@@ -7,7 +7,7 @@
 	<p align="center">
 		The open source, AI-powered app builder
     <br />
-    <a href="https://cap.so"><strong>teta.so »</strong></a>
+    <a href="https://teta.so"><strong>teta.so »</strong></a>
     <br />
     <br />
     <i><b>Build a mobile app by describing it.</b><br/>
