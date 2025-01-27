@@ -21,6 +21,8 @@ Teta is available for macOS. Versions for other platforms are under development.
 
 # Teta OSS Editor
 
+![Tetaoss-ezgif com-video-to-gif-converter](https://github.com/user-attachments/assets/5b229a3e-b01a-4e29-b571-ff8983a68de5)
+
 Teta OSS is a local, AI-powered app builder, available in an open-source version.  
 This version includes only the editor, designed to work with a single project. The project path must be declared using a `.env` file.
 
