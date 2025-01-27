@@ -12,7 +12,7 @@ final _router = Router()..post('/dev', _dev);
 late OpenAIClient _client;
 
 Future<void> main() async {
-  _client = OpenAIClient(apiKey: Env.openAIKey);
+  _client = OpenAIClient(apiKey: Env.llmKey, baseUrl: Env.llmBaseUrl);
 
   final cascade = Cascade().add(_router.call);
 
@@ -36,32 +36,79 @@ Future<Response> _dev(Request req) async {
           .map((e) => ChatCompletionUserMessage(
               content: ChatCompletionUserMessageContent.string(e)))
           .toList();
+  print('Sending request: $request');
   final stream = _client.createChatCompletionStream(
     request: CreateChatCompletionRequest(
-      model: const ChatCompletionModel.model(ChatCompletionModels.gpt4oMini),
+      model: ChatCompletionModel.modelId(Env.llmModel),
+      temperature: 0,
       messages: [
         ChatCompletionMessage.system(content: '''
-Hi, you are a Flutter developer copilot. Help people to build their own ideas.
-Work on the given code.
+You are a Flutter developer copilot. Your task is to help build Flutter applications by providing only the necessary code updates. Do not include any comments, explanations, or additional text in your response. Only provide the code for the files that need to be updated or created.
 
-Use '@file /lib/main.dart' structure for splitting the code between different files.
-Eg. @file /pubspec.yaml or @file /lib/utils.dart
-It will be recognized as a new file. Be sure to add all propers imports to make the code work.
+Use the following structure to specify files:
 
-Use '@file /file/path
-DELETE' to delete a file. 
+To create or update a file:
+@file /file/path
+[Code content]
+To delete a file:
+@file /file/path DELETE
+Ensure that all necessary imports are included in the code to make it functional. Do not add any extra text or comments outside of the code blocks.
+
 Example:
 
-@file /lib/utils.dart
-DELETE
+@file /lib/main.dart
+import 'package:flutter/material.dart';
 
-Respond only with the necessary updated files' code, and with no markdown formatting. Be sure the edited files have the entire code.
-App code: 
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text('Flutter App'),
+        ),
+        body: Center(
+          child: Text('Hello, World!'),
+        ),
+      ),
+    );
+  }
+}
+
+@file /pubspec.yaml
+name: my_flutter_app
+description: A new Flutter project.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=2.12.0 <3.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+
+App code:
 $codeContent
 
-${errors.isEmpty ? '' : 'Errors: ${errors.join('\n')}'}
+${errors.join('\n')}'}
 
-Think step by step.
+Instructions:
+
+Analyze the provided code.
+Identify changes needed.
+Provide only the updated or created code, without additional comments or phrases.
 '''),
         ...last5UserMessages,
         ChatCompletionUserMessage(
@@ -75,9 +122,14 @@ Think step by step.
   );
 
   return Response.ok(
-    stream.asyncMap((event) => event.choices.first.delta.content != null
-        ? utf8.encode(event.choices.first.delta.content!)
-        : utf8.encode('')),
+    stream.asyncMap(
+      (event) {
+        print('${event.choices.first.delta.content}');
+        return event.choices.first.delta.content != null
+            ? utf8.encode(event.choices.first.delta.content!)
+            : utf8.encode('');
+      },
+    ),
     context: {"shelf.io.buffer_output": false},
     headers: {
       'Cache-Control': 'no-store',

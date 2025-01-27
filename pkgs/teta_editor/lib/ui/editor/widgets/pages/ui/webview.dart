@@ -231,10 +231,7 @@ class _WebViewState extends State<WebViewArea> {
           },
         ),
       ).expanded(),
-    ]
-        .column()
-        .padding(const EdgeInsets.only(top: 8, bottom: 8, right: 8))
-        .expanded();
+    ].column().padding(const EdgeInsets.only(top: 8, bottom: 8, right: 8));
   }
 
   Widget projectCreating(BuildContext context) {

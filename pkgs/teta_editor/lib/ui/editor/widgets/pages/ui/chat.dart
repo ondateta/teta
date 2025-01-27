@@ -81,8 +81,7 @@ class _ChatState extends State<ChatArea> {
           color: const Color(0xFF333333),
           borderRadius: BorderRadius.circular(8),
         ))
-        .padding(const EdgeInsets.only(top: 8, bottom: 8))
-        .expanded();
+        .padding(const EdgeInsets.only(top: 8, bottom: 8));
   }
 
   Widget messageBuilder(

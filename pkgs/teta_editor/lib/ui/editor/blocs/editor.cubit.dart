@@ -218,7 +218,10 @@ class FlutterRunCubit extends HydratedCubit<FlutterRunState> {
     String request, {
     List<String> errors = const [],
   }) async {
-    if (!canContinueWithRequest) return;
+    if (!canContinueWithRequest) {
+      logger.e('Cannot continue with the request');
+      return;
+    }
     addMessage(
       types.TextMessage(
         author: state.common.chatState.user,
@@ -247,8 +250,8 @@ $mergeLibContent''';
         .reversed
         .take(5)
         .toList();
-    final url = Uri.parse(
-        'http://localhost:3002/dev'); // Sostituisci con il tuo endpoint
+    logger.i('Ready to send request to the AI');
+    final url = Uri.parse('http://localhost:3002/dev');
     final httpReq = http.Request("POST", url);
     httpReq.body = jsonEncode({
       "request": request,
@@ -261,6 +264,8 @@ $mergeLibContent''';
     });
 
     final httpRes = await httpReq.send();
+
+    logger.i('Request sent to the AI');
 
     /// Create a new message with the request
     final responseContent = StringBuffer();
@@ -286,7 +291,11 @@ $mergeLibContent''';
 
     /// Wait for the response from the AI
     await for (final res in httpRes.stream.transform(utf8.decoder)) {
-      if (!canContinueWithRequest) return;
+      if (!canContinueWithRequest) {
+        logger.e('Cannot continue with the request');
+        return;
+      }
+      logger.i(res);
       responseContent.write(res);
       parts = _splitCodeInEntriesPathAndContent(responseContent.toString());
       updateMessage(
@@ -364,7 +373,10 @@ $mergeLibContent''';
     Map<String, String> parts, {
     bool rebuild = true,
   }) {
-    if (!canContinueWithRequest) return;
+    if (!canContinueWithRequest) {
+      logger.e('Cannot continue with the request');
+      return;
+    }
     logger.i('Parts: $parts');
     bool haveDependenciesChanged = false;
     for (final part in parts.entries) {
