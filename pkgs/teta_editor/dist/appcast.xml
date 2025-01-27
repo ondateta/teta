@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+    <channel>
+        <title>auto_updater_example</title>
+        <description>Most recent updates to auto_updater_example</description>
+        <language>en</language>
+        <item>
+            <title>Version 1.1.0</title>
+            <!-- For the macOS item, it is recommended to add 'sparkle:version' and 'sparkle:shortVersionString' to the item node, rather than as part of the enclosure. -->
+            <sparkle:version>2</sparkle:version>
+            <sparkle:shortVersionString>1.1.0</sparkle:shortVersionString>
+            <sparkle:releaseNotesLink>
+                https://your_domain/your_path/release_notes.html
+            </sparkle:releaseNotesLink>
+            <pubDate>Sun, 16 Feb 2022 12:00:00 +0800</pubDate>
+            <enclosure url="1.0.0+1/editor-1.0.0+1-macos.zip"
+                       sparkle:edSignature="tb6W514D9aw6SLfDcWEN2cFQaaZqXm9KC+S4KDRZgnWMxFWSdizJyra5z7mGqac0nbjqiQLHfpcmLw+K5KsOBA==" 
+                       length="32075360"
+                       sparkle:os="macos"
+                       type="application/octet-stream" />
+        </item>
+        <item>
+            <title>Version 0.0.1</title>
+            <!-- For the macOS item, it is recommended to add 'sparkle:version' and 'sparkle:shortVersionString' to the item node, rather than as part of the enclosure. -->
+            <sparkle:version>1</sparkle:version>
+            <sparkle:shortVersionString>0.0.1</sparkle:shortVersionString>
+            <sparkle:releaseNotesLink>
+                https://your_domain/your_path/release_notes.html
+            </sparkle:releaseNotesLink>
+            <pubDate>Sun, 16 Feb 2022 12:00:00 +0800</pubDate>
+            <enclosure url="1.0.0+1/editor-1.0.0+1-macos.zip"
+                       sparkle:edSignature="tb6W514D9aw6SLfDcWEN2cFQaaZqXm9KC+S4KDRZgnWMxFWSdizJyra5z7mGqac0nbjqiQLHfpcmLw+K5KsOBA==" 
+                       length="32075360"
+                       sparkle:os="macos"
+                       type="application/octet-stream" />
+        </item>
+    </channel>
+</rss>

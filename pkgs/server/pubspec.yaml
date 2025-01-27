@@ -1,0 +1,35 @@
+name: server
+description: A sample command-line application.
+version: 1.0.0
+# repository: https://github.com/my_org/my_repo
+
+environment:
+  sdk: ^3.6.0
+
+# Add regular dependencies here.
+dependencies:
+  envied: ^1.1.0
+  openai_dart: ^0.4.5
+  shelf: ^1.4.2
+  shelf_router: ^1.1.4
+
+dev_dependencies:
+  build_runner: ^2.4.14
+  envied_generator: ^1.1.0
+  lints: ^5.0.0
+  test: ^1.24.0
+
+assets:
+  - .env
+
+scripts:
+  init: |
+    dart pub get
+    dart run build_runner build --delete-conflicting-outputs
+  test: |
+    dart test
+  gen: |
+    dart run build_runner build --delete-conflicting-outputs
+  run: |
+    dart run build_runner build --delete-conflicting-outputs
+    dart bin/server.dart
