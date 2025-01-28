@@ -6,23 +6,60 @@ import 'package:openai_dart/openai_dart.dart';
 import 'package:server/env/env.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart';
+import 'package:shelf_gzip/shelf_gzip.dart';
 import 'package:shelf_router/shelf_router.dart';
 
-final _router = Router()..post('/dev', _dev);
+final _router = Router()
+  ..post('/dev', _dev)
+  ..get('/doctor', _doctor);
 late OpenAIClient _client;
 
 Future<void> main() async {
   _client = OpenAIClient(apiKey: Env.llmKey, baseUrl: Env.llmBaseUrl);
 
-  final cascade = Cascade().add(_router.call);
+  final cascade = Pipeline()
+      .addMiddleware(gzipMiddleware)
+      .addMiddleware(
+        createCustomCorsHeadersMiddleware(),
+      )
+      .addHandler(_router.call);
 
   final server = await serve(
-    logRequests().addHandler(cascade.handler),
+    logRequests().addHandler(cascade),
     InternetAddress.anyIPv4,
     Env.port,
   );
 
   print('Serving at http://${server.address.host}:${server.port}');
+}
+
+Middleware _createCorsHeadersMiddleware({
+  Map<String, String> corsHeaders = const {'Access-Control-Allow-Origin': '*'},
+}) {
+  // Handle preflight (OPTIONS) requests by just adding headers and an empty
+  // response.
+  FutureOr<Response?> handleOptionsRequest(Request request) {
+    if (request.method == 'OPTIONS') {
+      return Response.ok(null, headers: corsHeaders);
+    } else {
+      return null;
+    }
+  }
+
+  FutureOr<Response> addCorsHeaders(Response response) =>
+      response.change(headers: corsHeaders);
+
+  return createMiddleware(
+      requestHandler: handleOptionsRequest, responseHandler: addCorsHeaders);
+}
+
+Middleware createCustomCorsHeadersMiddleware() {
+  return _createCorsHeadersMiddleware(corsHeaders: <String, String>{
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers':
+        'Origin, X-Requested-With, Content-Type, Accept, x-goog-api-client, Authorization',
+  });
 }
 
 Future<Response> _dev(Request req) async {
@@ -130,6 +167,21 @@ Provide only the updated or created code, without additional comments or phrases
             : utf8.encode('');
       },
     ),
+    context: {"shelf.io.buffer_output": false},
+    headers: {
+      'Cache-Control': 'no-store',
+      'Content-Type': 'application/json',
+    },
+  );
+}
+
+Future<Response> _doctor(Request req) async {
+  final process = await Process.start(
+    '/app/opt/flutter',
+    ['doctor'],
+  );
+  return Response.ok(
+    process.stdout,
     context: {"shelf.io.buffer_output": false},
     headers: {
       'Cache-Control': 'no-store',
