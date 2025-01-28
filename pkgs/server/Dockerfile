@@ -39,4 +39,4 @@ RUN dart run build_runner build --delete-conflicting-outputs
 RUN dart compile exe bin/server.dart -o bin/server
 
 EXPOSE 8080
-ENTRYPOINT ["bin/dazero"]
+ENTRYPOINT ["bin/server"]
