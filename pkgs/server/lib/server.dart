@@ -32,7 +32,7 @@ class ProcessesManager {
     );
   }
 
-  void removeProcess(String pid) {
+  void removeProcess(int pid) {
     _processes.remove(pid);
   }
 
