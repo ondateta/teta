@@ -294,7 +294,7 @@ class _WebViewState extends State<WebViewArea> {
 }
 
 class _TopBar extends StatelessWidget {
-  const _TopBar({super.key});
+  const _TopBar();
 
   @override
   Widget build(BuildContext context) {

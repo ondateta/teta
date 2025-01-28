@@ -292,6 +292,7 @@ Future<Response> _runApp(Request req) async {
   final json = jsonDecode(await req.readAsString());
   final id = json['id'] as String;
   final buildPath = '${Directory.current.path}/apps/$id';
+  print(Directory(buildPath).existsSync());
   final process = await Process.start(
     'flutter',
     [
@@ -300,7 +301,6 @@ Future<Response> _runApp(Request req) async {
       'web-server',
     ],
     workingDirectory: buildPath,
-    runInShell: true,
   );
   process.stderr.listen((event) {
     print(event);
