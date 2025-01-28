@@ -11,7 +11,8 @@ import 'package:shelf_router/shelf_router.dart';
 
 final _router = Router()
   ..post('/dev', _dev)
-  ..get('/doctor', _doctor);
+  ..get('/doctor', _doctor)
+  ..get('/ls', _ls);
 late OpenAIClient _client;
 
 Future<void> main() async {
@@ -170,6 +171,22 @@ Provide only the updated or created code, without additional comments or phrases
             : utf8.encode('');
       },
     ),
+    context: {"shelf.io.buffer_output": false},
+    headers: {
+      'Cache-Control': 'no-store',
+      'Content-Type': 'application/json',
+    },
+  );
+}
+
+Future<Response> _ls(Request req) async {
+  final process = await Process.start(
+    'ls',
+    [],
+    workingDirectory: Directory.current.path,
+  );
+  return Response.ok(
+    process.stdout,
     context: {"shelf.io.buffer_output": false},
     headers: {
       'Cache-Control': 'no-store',
