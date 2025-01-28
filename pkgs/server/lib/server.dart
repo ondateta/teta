@@ -12,9 +12,12 @@ import 'package:shelf_router/shelf_router.dart';
 final _router = Router()
   ..post('/dev', _dev)
   ..get('/doctor', _doctor)
+  ..get('/current', _currentProcesses)
   ..get('/ls', _ls)
   ..get('/lsShell', _lsShell);
 late OpenAIClient _client;
+
+final Map<String, Process> processes = {};
 
 Future<void> main() async {
   _client = OpenAIClient(apiKey: Env.llmKey, baseUrl: Env.llmBaseUrl);
@@ -214,12 +217,22 @@ Future<Response> _doctor(Request req) async {
     ['doctor'],
     workingDirectory: Directory.current.path,
   );
+  processes['doctor'] = process;
   return Response.ok(
     process.stdout,
     context: {"shelf.io.buffer_output": false},
     headers: {
       'Cache-Control': 'no-store',
       'Content-Type': 'application/json',
+    },
+  );
+}
+
+Future<Response> _currentProcesses(Request req) async {
+  return Response.ok(
+    processes.length.toString(),
+    headers: {
+      'Cache-Control': 'no-store',
     },
   );
 }
