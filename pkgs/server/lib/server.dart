@@ -302,6 +302,9 @@ Future<Response> _runApp(Request req) async {
     ],
     workingDirectory: buildPath,
   );
+  process.stdout.listen((event) {
+    print(event);
+  });
   process.stderr.listen((event) {
     print(event);
   });
