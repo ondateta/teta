@@ -255,6 +255,7 @@ Future<Response> _ls(Request req) async {
 
 Future<Response> _lsShell(Request req) async {
   final process = await Process.start('ls', [], runInShell: true);
+  process.exitCode.then((e) => manager.removeProcess(process.pid));
   return Response.ok(
     process.stdout,
     context: {"shelf.io.buffer_output": false},
@@ -272,6 +273,7 @@ Future<Response> _doctor(Request req) async {
     workingDirectory: Directory.current.path,
   );
   manager.addProcess(process.pid, null);
+  process.exitCode.then((e) => manager.removeProcess(process.pid));
   return Response.ok(
     process.stdout,
     context: {"shelf.io.buffer_output": false},
@@ -293,6 +295,7 @@ Future<Response> _createApp(Request req) async {
     workingDirectory: buildPath,
   );
   manager.addProcess(process.pid, null);
+  process.exitCode.then((e) => manager.removeProcess(process.pid));
   return Response.ok(
     process.stdout,
     context: {"shelf.io.buffer_output": false},
@@ -321,6 +324,7 @@ Future<Response> _pubGet(Request req) async {
     print(event);
   });
   manager.addProcess(process.pid, id);
+  process.exitCode.then((e) => manager.removeProcess(process.pid));
   return Response.ok(
     process.stdout,
     context: {"shelf.io.buffer_output": false},
@@ -348,6 +352,7 @@ Future<Response> _runApp(Request req) async {
     print(event);
   });
   manager.addProcess(process.pid, id);
+  process.exitCode.then((e) => manager.removeProcess(process.pid));
   return Response.ok(
     process.stdout,
     context: {"shelf.io.buffer_output": false},
