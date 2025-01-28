@@ -1,8 +1,5 @@
 FROM debian:bullseye-slim
 
-RUN useradd -m appuser
-USER appuser
-
 RUN apt update -y
 RUN apt install -y git wget curl unzip lib32stdc++6 libglu1-mesa default-jdk-headless
 
@@ -20,6 +17,9 @@ RUN echo "PORT=\$PORT" >> /app/.env \
     && echo "LLM_KEY=\$LLM_KEY" >> /app/.env \
     && echo "LLM_BASE_URL=\$LLM_BASE_URL" >> /app/.env \
     && echo "LLM_MODEL=\$LLM_MODEL" >> /app/.env
+
+RUN useradd -m appuser
+USER appuser
 
 RUN dart pub get
 
