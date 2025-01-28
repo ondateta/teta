@@ -8,7 +8,9 @@ WORKDIR /app
 COPY . /app
 
 ENV FLUTTER_ROOT="/app/opt/flutter"
-RUN git clone https://github.com/flutter/flutter "${FLUTTER_ROOT}"
+RUN if [ ! -d "/app/opt/flutter" ]; then \
+        git clone https://github.com/flutter/flutter "${FLUTTER_ROOT}"; \
+    fi
 ENV PATH="${FLUTTER_ROOT}/bin:${PATH}"
 
 RUN chmod -R a+w "${FLUTTER_ROOT}"
