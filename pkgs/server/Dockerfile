@@ -21,6 +21,8 @@ RUN echo "PORT=\$PORT" >> /app/.env \
 RUN useradd -m appuser
 USER appuser
 
+RUN git config --global --add safe.directory "${FLUTTER_ROOT}"
+
 RUN dart pub get
 
 RUN which dart
