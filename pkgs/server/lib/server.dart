@@ -283,7 +283,6 @@ Future<Response> _createApp(Request req) async {
     context: {"shelf.io.buffer_output": false},
     headers: {
       'Cache-Control': 'no-store',
-      'Content-Type': 'application/json',
     },
   );
 }
@@ -304,9 +303,6 @@ Future<Response> _runApp(Request req) async {
     ],
     workingDirectory: buildPath,
   );
-  process.stdout.listen((event) {
-    print(event);
-  });
   process.stderr.listen((event) {
     print(event);
   });
@@ -316,7 +312,6 @@ Future<Response> _runApp(Request req) async {
     context: {"shelf.io.buffer_output": false},
     headers: {
       'Cache-Control': 'no-store',
-      'Content-Type': 'application/json',
     },
   );
 }
