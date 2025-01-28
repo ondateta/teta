@@ -1,14 +1,13 @@
 FROM alpine:latest
 
-
 RUN apk update && apk add --no-cache \
     git \
     wget \
     curl \
     unzip \
-    lib32stdc++6 \
-    libglu1-mesa \
-    openjdk11-jdk-headless
+    openjdk11 \
+    libstdc++ \
+    mesa-gl
 
 WORKDIR /app
 
