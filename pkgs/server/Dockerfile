@@ -1,5 +1,8 @@
 FROM debian:bullseye-slim
 
+RUN useradd -m appuser
+USER appuser
+
 RUN apt update -y
 RUN apt install -y git wget curl unzip lib32stdc++6 libglu1-mesa default-jdk-headless
 
@@ -10,6 +13,8 @@ COPY . /app
 ENV FLUTTER_ROOT="/app/opt/flutter"
 RUN git clone https://github.com/flutter/flutter "${FLUTTER_ROOT}"
 ENV PATH="${FLUTTER_ROOT}/bin:${PATH}"
+
+RUN chmod -R a+w "${FLUTTER_ROOT}"
 
 RUN echo "PORT=\$PORT" >> /app/.env \
     && echo "LLM_KEY=\$LLM_KEY" >> /app/.env \
