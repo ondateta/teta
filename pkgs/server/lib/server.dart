@@ -298,6 +298,7 @@ Future<Response> _createApp(Request req) async {
     context: {"shelf.io.buffer_output": false},
     headers: {
       'Cache-Control': 'no-store',
+      'Content-Type': 'text/plain',
     },
   );
 }
@@ -325,6 +326,7 @@ Future<Response> _pubGet(Request req) async {
     context: {"shelf.io.buffer_output": false},
     headers: {
       'Cache-Control': 'no-store',
+      'Content-Type': 'text/plain',
     },
   );
 }
@@ -351,6 +353,8 @@ Future<Response> _runApp(Request req) async {
     context: {"shelf.io.buffer_output": false},
     headers: {
       'Cache-Control': 'no-store',
+      'Content-Encoding': 'identity',
+      'Content-Type': 'text/plain',
     },
   );
 }
