@@ -11,7 +11,10 @@ ENV FLUTTER_ROOT="/app/opt/flutter"
 RUN git clone https://github.com/flutter/flutter "${FLUTTER_ROOT}"
 ENV PATH="${FLUTTER_ROOT}/bin:${PATH}"
 
-RUN flutter config --no-analytics
+RUN echo "PORT=\$PORT" >> /app/.env \
+    && echo "LLM_KEY=\$LLM_KEY" >> /app/.env \
+    && echo "LLM_BASE_URL=\$LLM_BASE_URL" >> /app/.env \
+    && echo "LLM_MODEL=\$LLM_MODEL" >> /app/.env
 
 RUN dart pub get
 
@@ -21,5 +24,5 @@ RUN dart run build_runner build --delete-conflicting-outputs
 
 RUN dart compile exe bin/server.dart -o bin/server
 
-EXPOSE 8080
+EXPOSE 3002
 ENTRYPOINT ["bin/server"]
