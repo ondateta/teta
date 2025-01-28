@@ -1,7 +1,14 @@
 FROM alpine:latest
 
-RUN apt update -y
-RUN apt install -y git wget curl unzip lib32stdc++6 libglu1-mesa default-jdk-headless
+
+RUN apk update && apk add --no-cache \
+    git \
+    wget \
+    curl \
+    unzip \
+    lib32stdc++6 \
+    libglu1-mesa \
+    openjdk11-jdk-headless
 
 WORKDIR /app
 
