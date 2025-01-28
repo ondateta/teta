@@ -182,6 +182,7 @@ Future<Response> _doctor(Request req) async {
   final process = await Process.start(
     '/app/opt/flutter',
     ['doctor'],
+    workingDirectory: Directory.current.path,
   );
   return Response.ok(
     process.stdout,
