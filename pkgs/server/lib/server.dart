@@ -17,6 +17,9 @@ late OpenAIClient _client;
 Future<void> main() async {
   _client = OpenAIClient(apiKey: Env.llmKey, baseUrl: Env.llmBaseUrl);
 
+  print(
+      'Env files, port: ${Env.port}, llmKey: ${Env.llmKey}, llmBaseUrl ${Env.llmBaseUrl}, llmModel: ${Env.llmModel}');
+
   final cascade = Pipeline()
       .addMiddleware(gzipMiddleware)
       .addMiddleware(
