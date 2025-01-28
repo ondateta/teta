@@ -17,6 +17,7 @@ final _router = Router()
   ..get('/lsShell', _lsShell)
   ..post('/create', _createApp)
   ..post('/pubGet', _pubGet)
+  ..post('/build', _buildApp)
   ..post('/run', _runApp);
 late OpenAIClient _client;
 
@@ -350,6 +351,36 @@ Future<Response> _runApp(Request req) async {
       '0.0.0.0',
       '--web-port',
       '8081',
+      '--verbose',
+    ],
+    workingDirectory: buildPath,
+  );
+  process.stderr.listen((event) {
+    print(event);
+  });
+  manager.addProcess(process.pid, id);
+  process.exitCode.then((e) => manager.removeProcess(process.pid));
+  return Response.ok(
+    process.stdout,
+    context: {"shelf.io.buffer_output": false},
+    headers: {
+      'Cache-Control': 'no-store',
+      'Content-Encoding': 'identity',
+      'Content-Type': 'text/plain',
+    },
+  );
+}
+
+Future<Response> _buildApp(Request req) async {
+  final json = jsonDecode(await req.readAsString());
+  final id = json['id'] as String;
+  final buildPath = '${Directory.current.path}/apps/$id';
+  print(Directory(buildPath).existsSync());
+  final process = await Process.start(
+    'flutter',
+    [
+      'build',
+      'web',
       '--verbose',
     ],
     workingDirectory: buildPath,
