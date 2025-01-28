@@ -1,4 +1,4 @@
-FROM debian:bullseye-slim
+FROM alpine:latest
 
 RUN apt update -y
 RUN apt install -y git wget curl unzip lib32stdc++6 libglu1-mesa default-jdk-headless
