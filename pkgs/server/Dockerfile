@@ -24,5 +24,5 @@ RUN dart run build_runner build --delete-conflicting-outputs
 
 RUN dart compile exe bin/server.dart -o bin/server
 
-EXPOSE 3002
+EXPOSE $PORT
 ENTRYPOINT ["bin/server"]
