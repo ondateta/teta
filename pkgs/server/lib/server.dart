@@ -302,6 +302,9 @@ Future<Response> _runApp(Request req) async {
     workingDirectory: buildPath,
     runInShell: true,
   );
+  process.stderr.listen((event) {
+    print(event);
+  });
   manager.addProcess(process.pid, id);
   return Response.ok(
     process.stdout,
