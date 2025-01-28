@@ -42,6 +42,12 @@ class ProcessesManager {
       return now.difference(value.updatedAt).inMinutes > 5;
     });
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'processes': _processes.values.map((e) => e.toJson()).toList(),
+    };
+  }
 }
 
 class ProcessEntity {
@@ -50,6 +56,14 @@ class ProcessEntity {
   final DateTime updatedAt;
 
   ProcessEntity(this.pid, this.projectID, this.updatedAt);
+
+  Map<String, dynamic> toJson() {
+    return {
+      'pid': pid,
+      'projectID': projectID,
+      'updatedAt': updatedAt.toIso8601String(),
+    };
+  }
 }
 
 final manager = ProcessesManager();
@@ -296,10 +310,7 @@ Future<Response> _runApp(Request req) async {
     'flutter',
     [
       'run',
-      '-d',
-      'web-server',
-      '--web-port',
-      '8081',
+      '--verbose',
     ],
     workingDirectory: buildPath,
   );
@@ -318,9 +329,10 @@ Future<Response> _runApp(Request req) async {
 
 Future<Response> _currentProcesses(Request req) async {
   return Response.ok(
-    manager.length.toString(),
+    jsonEncode(manager.toJson()),
     headers: {
       'Cache-Control': 'no-store',
+      'Content-Type': 'application/json',
     },
   );
 }
