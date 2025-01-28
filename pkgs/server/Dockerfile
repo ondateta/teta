@@ -26,7 +26,7 @@ RUN echo "PORT=\$PORT" >> /app/.env \
     && echo "LLM_BASE_URL=\$LLM_BASE_URL" >> /app/.env \
     && echo "LLM_MODEL=\$LLM_MODEL" >> /app/.env
 
-RUN useradd -m appuser && chown -R appuser:appuser /app
+RUN apk update && apk add --no-cache shadow && useradd -m appuser && chown -R appuser:appuser /app
 USER appuser
 
 RUN git config --global --add safe.directory "${FLUTTER_ROOT}"
