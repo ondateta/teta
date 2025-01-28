@@ -14,10 +14,45 @@ final _router = Router()
   ..get('/doctor', _doctor)
   ..get('/current', _currentProcesses)
   ..get('/ls', _ls)
-  ..get('/lsShell', _lsShell);
+  ..get('/lsShell', _lsShell)
+  ..post('/create', _createApp)
+  ..post('/run', _runApp);
 late OpenAIClient _client;
 
-final Map<String, Process> processes = {};
+class ProcessesManager {
+  final Map<int, ProcessEntity> _processes = {};
+
+  int get length => _processes.length;
+
+  void addProcess(int pid, String? projectID) {
+    _processes[pid] = ProcessEntity(
+      pid,
+      projectID,
+      DateTime.now(),
+    );
+  }
+
+  void removeProcess(String pid) {
+    _processes.remove(pid);
+  }
+
+  void removeOldProcesses() {
+    final now = DateTime.now();
+    _processes.removeWhere((key, value) {
+      return now.difference(value.updatedAt).inMinutes > 5;
+    });
+  }
+}
+
+class ProcessEntity {
+  final int pid;
+  final String? projectID;
+  final DateTime updatedAt;
+
+  ProcessEntity(this.pid, this.projectID, this.updatedAt);
+}
+
+final manager = ProcessesManager();
 
 Future<void> main() async {
   _client = OpenAIClient(apiKey: Env.llmKey, baseUrl: Env.llmBaseUrl);
@@ -39,6 +74,10 @@ Future<void> main() async {
   );
 
   print('Serving at http://${server.address.host}:${server.port}');
+
+  Timer.periodic(Duration(minutes: 1), (timer) {
+    manager.removeOldProcesses();
+  });
 }
 
 Middleware _createCorsHeadersMiddleware({
@@ -217,7 +256,53 @@ Future<Response> _doctor(Request req) async {
     ['doctor'],
     workingDirectory: Directory.current.path,
   );
-  processes['doctor'] = process;
+  manager.addProcess(process.pid, null);
+  return Response.ok(
+    process.stdout,
+    context: {"shelf.io.buffer_output": false},
+    headers: {
+      'Cache-Control': 'no-store',
+      'Content-Type': 'application/json',
+    },
+  );
+}
+
+Future<Response> _createApp(Request req) async {
+  final json = jsonDecode(await req.readAsString());
+  final id = json['id'] as String;
+  final buildPath = '${Directory.current.path}/apps/$id';
+  await Directory(buildPath).create(recursive: true);
+  final process = await Process.start(
+    'flutter',
+    ['create', '.'],
+    workingDirectory: buildPath,
+  );
+  manager.addProcess(process.pid, null);
+  return Response.ok(
+    process.stdout,
+    context: {"shelf.io.buffer_output": false},
+    headers: {
+      'Cache-Control': 'no-store',
+      'Content-Type': 'application/json',
+    },
+  );
+}
+
+Future<Response> _runApp(Request req) async {
+  final json = jsonDecode(await req.readAsString());
+  final id = json['id'] as String;
+  final buildPath = '${Directory.current.path}/apps/$id';
+  final process = await Process.start(
+    'flutter',
+    [
+      'run',
+      '-d',
+      'web-server',
+    ],
+    workingDirectory: buildPath,
+    runInShell: true,
+  );
+  manager.addProcess(process.pid, id);
   return Response.ok(
     process.stdout,
     context: {"shelf.io.buffer_output": false},
@@ -230,7 +315,7 @@ Future<Response> _doctor(Request req) async {
 
 Future<Response> _currentProcesses(Request req) async {
   return Response.ok(
-    processes.length.toString(),
+    manager.length.toString(),
     headers: {
       'Cache-Control': 'no-store',
     },
