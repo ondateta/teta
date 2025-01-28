@@ -344,6 +344,8 @@ Future<Response> _runApp(Request req) async {
     'flutter',
     [
       'run',
+      '-d',
+      'web-server',
       '--verbose',
     ],
     workingDirectory: buildPath,
