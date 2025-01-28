@@ -299,6 +299,8 @@ Future<Response> _runApp(Request req) async {
       'run',
       '-d',
       'web-server',
+      '--web-port',
+      '8081',
     ],
     workingDirectory: buildPath,
   );
