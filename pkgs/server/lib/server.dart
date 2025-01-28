@@ -210,7 +210,7 @@ Future<Response> _lsShell(Request req) async {
 
 Future<Response> _doctor(Request req) async {
   final process = await Process.start(
-    '/app/opt/flutter',
+    'flutter',
     ['doctor'],
     workingDirectory: Directory.current.path,
   );
