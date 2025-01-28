@@ -31,6 +31,7 @@ USER appuser
 
 RUN git config --global --add safe.directory "${FLUTTER_ROOT}"
 
+RUN apk add --no-cache bash
 RUN flutter clean
 
 RUN dart pub get
