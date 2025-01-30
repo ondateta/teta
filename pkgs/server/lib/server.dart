@@ -77,15 +77,10 @@ Future<void> main() async {
   print(
       'Env files, port: ${Env.port}, llmKey: ${Env.llmKey}, llmBaseUrl ${Env.llmBaseUrl}, llmModel: ${Env.llmModel}');
 
-  final cascade = Pipeline()
-      .addMiddleware(gzipMiddleware)
-      .addMiddleware(
-        createCustomCorsHeadersMiddleware(),
-      )
-      .addHandler(_router.call);
+  final cascade = Cascade()..add(_router.call);
 
   final server = await serve(
-    logRequests().addHandler(cascade),
+    cascade.handler,
     InternetAddress.anyIPv4,
     Env.port,
   );
