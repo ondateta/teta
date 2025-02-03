@@ -14,7 +14,7 @@ class EditorView extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) =>
-          FlutterRunCubit(teta.appPath, teta.projectID)..init(),
+          FlutterRunCubit(teta.appPath, teta.projectID, teta.serverUrl)..init(),
       child: Scaffold(
         body: child.padding(const EdgeInsets.only(top: 24)),
       ),

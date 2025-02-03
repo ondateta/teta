@@ -37,7 +37,11 @@ Future<void> main() async {
   final targetDir = Directory(Env.projectPath.endsWith('/')
       ? Env.projectPath.substring(0, Env.projectPath.length - 1)
       : Env.projectPath);
-  teta = TetaEditor(targetDir.path, 'app');
+  teta = TetaEditor(
+    targetDir.path,
+    'app',
+    Env.serverUrl,
+  );
   runApp(_App());
 }
 

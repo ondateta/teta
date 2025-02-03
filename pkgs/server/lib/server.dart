@@ -80,7 +80,7 @@ Future<void> main() async {
   final cascade = Cascade()..add(_router.call);
 
   final server = await serve(
-    cascade.handler,
+    _router.call,
     InternetAddress.anyIPv4,
     Env.port,
   );
@@ -135,8 +135,7 @@ Future<Response> _dev(Request req) async {
   print('Sending request: $request');
   final stream = _client.createChatCompletionStream(
     request: CreateChatCompletionRequest(
-      model: ChatCompletionModel.modelId(Env.llmModel),
-      temperature: 0,
+      model: ChatCompletionModel.modelId('o3-mini'),
       messages: [
         ChatCompletionMessage.system(content: '''
 You are a Flutter developer copilot. Your task is to help build Flutter applications by providing only the necessary code updates. Do not include any comments, explanations, or additional text in your response. Only provide the code for the files that need to be updated or created.
@@ -211,9 +210,9 @@ Provide only the updated or created code, without additional comments or phrases
           content: ChatCompletionUserMessageContent.string(request),
         )
       ],
-      prediction: PredictionContent(
+      /*prediction: PredictionContent(
         content: PredictionContentContent.text(codeContent),
-      ),
+      ),*/
     ),
   );
 

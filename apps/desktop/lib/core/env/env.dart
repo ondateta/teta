@@ -6,4 +6,7 @@ part 'env.g.dart';
 abstract class Env {
   @EnviedField(varName: 'PROJECT_PATH')
   static const String projectPath = _Env.projectPath;
+
+  @EnviedField(varName: 'SERVER_URL')
+  static const String serverUrl = _Env.serverUrl;
 }

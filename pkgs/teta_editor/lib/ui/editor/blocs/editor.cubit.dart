@@ -23,6 +23,7 @@ class FlutterRunCubit extends HydratedCubit<FlutterRunState> {
   FlutterRunCubit(
     String tetaDocumentsPath,
     this.projectID,
+    this.serverUrl,
   ) : super(
           FlutterRunState.notStarted(
             common: CommonEditorState(
@@ -33,6 +34,7 @@ class FlutterRunCubit extends HydratedCubit<FlutterRunState> {
         );
 
   String projectID;
+  String serverUrl;
   late Process p;
 
   /// * Initialize the project
@@ -123,6 +125,18 @@ class FlutterRunCubit extends HydratedCubit<FlutterRunState> {
     );
   }
 
+  void removeMessage(String id) {
+    final messages =
+        state.common.chatState.messages.where((e) => e.id != id).toList();
+    emit(
+      state.copyWith(
+        common: state.common.copyWith.chatState(
+          messages: messages,
+        ),
+      ),
+    );
+  }
+
   /// Set the editing mode of the chat
   void setEditingMode(EditingMode mode) => emit(
         state.copyWith(
@@ -201,6 +215,7 @@ class FlutterRunCubit extends HydratedCubit<FlutterRunState> {
         );
         break;
       case EditingMode.agent:
+      
         await _writeCode(request);
         break;
     }
@@ -217,6 +232,7 @@ class FlutterRunCubit extends HydratedCubit<FlutterRunState> {
   Future<void> _writeCode(
     String request, {
     List<String> errors = const [],
+    void Function(String)? onError,
   }) async {
     if (!canContinueWithRequest) {
       logger.e('Cannot continue with the request');
@@ -251,7 +267,7 @@ $mergeLibContent''';
         .take(5)
         .toList();
     logger.i('Ready to send request to the AI');
-    final url = Uri.parse('http://localhost:3002/dev');
+    final url = Uri.parse('$serverUrl/dev');
     final httpReq = http.Request("POST", url);
     httpReq.body = jsonEncode({
       "request": request,
@@ -264,6 +280,12 @@ $mergeLibContent''';
     });
 
     final httpRes = await httpReq.send();
+
+    if (httpRes.statusCode != 200) {
+      addError('Failed to send request to the AI: ${httpRes.statusCode}',
+          StackTrace.current);
+      return;
+    }
 
     logger.i('Request sent to the AI');
 
@@ -286,6 +308,8 @@ $mergeLibContent''';
     if (httpRes.statusCode != 200) {
       addError(
           'Failed to fetch stream: ${httpRes.statusCode}', StackTrace.current);
+      onError?.call('Failed to fetch stream: ${httpRes.statusCode}');
+      removeMessage(replyMessageID);
       return;
     }
 

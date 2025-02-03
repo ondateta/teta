@@ -7,12 +7,14 @@ import 'package:go_router/go_router.dart';
 class TetaEditor {
   final String appPath;
   final String projectID;
+  final String serverUrl;
 
   String get appFolderName => projectID;
 
   const TetaEditor(
     this.appPath,
     this.projectID,
+    this.serverUrl,
   );
 
   List<RouteBase> get routes => [
