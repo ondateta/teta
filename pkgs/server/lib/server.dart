@@ -6,7 +6,7 @@ import 'package:openai_dart/openai_dart.dart';
 import 'package:server/env/env.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart';
-import 'package:shelf_gzip/shelf_gzip.dart';
+import 'package:shelf_proxy/shelf_proxy.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 final _router = Router()
@@ -19,7 +19,8 @@ final _router = Router()
   ..post('/pubGet', _pubGet)
   ..post('/build', _buildApp)
   ..post('/buildWasm', _buildAppWasm)
-  ..post('/run', _runApp);
+  ..post('/run', _runApp)
+  ..get('/app/<id>', appHandler);
 late OpenAIClient _client;
 
 class ProcessesManager {
@@ -37,6 +38,12 @@ class ProcessesManager {
       port++;
     }
     return port;
+  }
+
+  int getAppPort(String id) {
+    final process =
+        _processes.values.firstWhere((element) => element.projectID == id);
+    return process.port!;
   }
 
   void addProcess(int pid, String? projectID, int? port) {
@@ -457,4 +464,20 @@ Future<Response> _currentProcesses(Request req) async {
       'Content-Type': 'application/json',
     },
   );
+}
+
+Future<Response> appHandler(Request request) async {
+  final segments = request.url.pathSegments;
+  if (segments.length < 2) {
+    return Response.notFound('ID mancante nell\'URL');
+  }
+
+  final appId = segments[1]; // estrae l'ID da /app/{id}
+  final port = manager.getAppPort(appId);
+
+  // Crea il reverse proxy handler per l'URL corretto
+  final handler = proxyHandler(Uri.parse('http://0.0.0.0:$port'));
+
+  // Inoltra la richiesta al backend e restituisci la risposta
+  return await handler(request);
 }

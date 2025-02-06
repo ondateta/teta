@@ -12,6 +12,7 @@ dependencies:
   openai_dart: ^0.4.5
   shelf: ^1.4.2
   shelf_gzip: ^4.1.0
+  shelf_proxy: ^1.0.4
   shelf_router: ^1.1.4
 
 dev_dependencies:
