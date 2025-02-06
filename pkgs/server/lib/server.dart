@@ -364,6 +364,7 @@ Future<Response> _runApp(Request req) async {
   final buildPath = '${Directory.current.path}/apps/$id';
   print(Directory(buildPath).existsSync());
   final port = manager.findNewPort;
+  await updateBaseHref('web/index.html', '/apps/$id');
   final process = await Process.start(
     'flutter',
     [
@@ -393,6 +394,51 @@ Future<Response> _runApp(Request req) async {
       'Content-Type': 'text/plain',
     },
   );
+}
+
+/// Aggiorna il tag <base> in un file HTML.
+///
+/// [filePath]: il percorso del file (es. 'web/index.html').
+/// [newBaseHref]: il nuovo valore per l'attributo href (es. '/flutter/').
+Future<void> updateBaseHref(String filePath, String newBaseHref) async {
+  final file = File(filePath);
+
+  if (!await file.exists()) {
+    print('Il file $filePath non esiste.');
+    return;
+  }
+
+  String content = await file.readAsString();
+
+  // Pattern regex per cercare un tag <base ...> (non case sensitive).
+  final baseTagPattern = RegExp(
+    r'''<base\s+href\s*=\s*["\'][^"\']*["\']\s*/?>''',
+    caseSensitive: false,
+  );
+
+  // Nuovo tag <base> da inserire.
+  final newBaseTag = '<base href="$newBaseHref">';
+
+  if (baseTagPattern.hasMatch(content)) {
+    // Se il tag <base> esiste, lo sostituisci.
+    content = content.replaceAll(baseTagPattern, newBaseTag);
+    print('Tag <base> sostituito.');
+  } else {
+    // Se non esiste, inserisci il nuovo tag subito dopo <head>
+    final headTagPattern = RegExp(r'<head\s*>', caseSensitive: false);
+    if (headTagPattern.hasMatch(content)) {
+      content = content.replaceFirst(headTagPattern, '<head>\n  $newBaseTag');
+      print('Tag <base> inserito dopo <head>.');
+    } else {
+      // Se non esiste nemmeno <head>, lo aggiungi all'inizio del file.
+      content = '$newBaseTag\n$content';
+      print('Tag <base> aggiunto all\'inizio del file.');
+    }
+  }
+
+  // Salva il contenuto modificato nel file.
+  await file.writeAsString(content);
+  print('Il file $filePath è stato aggiornato con base href "$newBaseHref".');
 }
 
 Future<Response> _buildApp(Request req) async {
