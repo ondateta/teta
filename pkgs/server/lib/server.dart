@@ -27,11 +27,24 @@ class ProcessesManager {
 
   int get length => _processes.length;
 
-  void addProcess(int pid, String? projectID) {
+  /// return a free port (8080 is taken by default)
+  int get findNewPort {
+    int port = 8081;
+    // Crea un insieme con tutte le porte in uso dai processi
+    final usedPorts = _processes.values.map((process) => process.port).toSet();
+    // Cerca la prima porta non usata
+    while (usedPorts.contains(port)) {
+      port++;
+    }
+    return port;
+  }
+
+  void addProcess(int pid, String? projectID, int? port) {
     _processes[pid] = ProcessEntity(
       pid,
       projectID,
       DateTime.now(),
+      port,
     );
   }
 
@@ -57,14 +70,21 @@ class ProcessEntity {
   final int pid;
   final String? projectID;
   final DateTime updatedAt;
+  final int? port;
 
-  ProcessEntity(this.pid, this.projectID, this.updatedAt);
+  ProcessEntity(
+    this.pid,
+    this.projectID,
+    this.updatedAt,
+    this.port,
+  );
 
   Map<String, dynamic> toJson() {
     return {
       'pid': pid,
       'projectID': projectID,
       'updatedAt': updatedAt.toIso8601String(),
+      'port': port,
     };
   }
 }
@@ -268,7 +288,7 @@ Future<Response> _doctor(Request req) async {
     ['doctor'],
     workingDirectory: Directory.current.path,
   );
-  manager.addProcess(process.pid, null);
+  manager.addProcess(process.pid, null, null);
   process.exitCode.then((e) => manager.removeProcess(process.pid));
   return Response.ok(
     process.stdout,
@@ -290,7 +310,7 @@ Future<Response> _createApp(Request req) async {
     ['create', '.'],
     workingDirectory: buildPath,
   );
-  manager.addProcess(process.pid, null);
+  manager.addProcess(process.pid, null, null);
   process.exitCode.then((e) => manager.removeProcess(process.pid));
   return Response.ok(
     process.stdout,
@@ -319,7 +339,7 @@ Future<Response> _pubGet(Request req) async {
   process.stderr.listen((event) {
     print(event);
   });
-  manager.addProcess(process.pid, id);
+  manager.addProcess(process.pid, id, null);
   process.exitCode.then((e) => manager.removeProcess(process.pid));
   return Response.ok(
     process.stdout,
@@ -336,6 +356,7 @@ Future<Response> _runApp(Request req) async {
   final id = json['id'] as String;
   final buildPath = '${Directory.current.path}/apps/$id';
   print(Directory(buildPath).existsSync());
+  final port = manager.findNewPort;
   final process = await Process.start(
     'flutter',
     [
@@ -345,15 +366,16 @@ Future<Response> _runApp(Request req) async {
       '--web-hostname',
       '0.0.0.0',
       '--web-port',
-      '8081',
+      '8080',
       '--verbose',
+      '--wasm',
     ],
     workingDirectory: buildPath,
   );
   process.stderr.listen((event) {
     print(event);
   });
-  manager.addProcess(process.pid, id);
+  manager.addProcess(process.pid, id, port);
   process.exitCode.then((e) => manager.removeProcess(process.pid));
   return Response.ok(
     process.stdout,
@@ -383,7 +405,7 @@ Future<Response> _buildApp(Request req) async {
   process.stderr.listen((event) {
     print(event);
   });
-  manager.addProcess(process.pid, id);
+  manager.addProcess(process.pid, id, null);
   process.exitCode.then((e) => manager.removeProcess(process.pid));
   return Response.ok(
     process.stdout,
@@ -414,7 +436,7 @@ Future<Response> _buildAppWasm(Request req) async {
   process.stderr.listen((event) {
     print(event);
   });
-  manager.addProcess(process.pid, id);
+  manager.addProcess(process.pid, id, null);
   process.exitCode.then((e) => manager.removeProcess(process.pid));
   return Response.ok(
     process.stdout,
