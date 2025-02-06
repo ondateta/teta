@@ -374,7 +374,8 @@ Future<Response> _runApp(Request req) async {
   final buildPath = '${Directory.current.path}/apps/$id';
   print(Directory(buildPath).existsSync());
   final port = manager.findNewPort;
-  await updateBaseHref('${Directory.current.path}/web/index.html', '/apps/$id');
+  await updateBaseHref(
+      '${Directory.current.path}/apps/$id/web/index.html', '/apps/$id');
   final process = await Process.start(
     'flutter',
     [
