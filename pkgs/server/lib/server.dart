@@ -61,9 +61,19 @@ class ProcessesManager {
 
   void removeOldProcesses() {
     final now = DateTime.now();
+    final deletingProjectsQueue = [];
     _processes.removeWhere((key, value) {
-      return now.difference(value.updatedAt).inMinutes > 5;
+      final flag = now.difference(value.updatedAt).inMinutes > 5;
+      if (flag) {
+        deletingProjectsQueue.add(value.projectID);
+      }
+      return flag;
     });
+    for (final projectID in deletingProjectsQueue) {
+      Directory('${Directory.current.path}/apps/$projectID').deleteSync(
+        recursive: true,
+      );
+    }
   }
 
   Map<String, dynamic> toJson() {
