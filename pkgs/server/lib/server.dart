@@ -373,7 +373,7 @@ Future<Response> _runApp(Request req) async {
       '--web-hostname',
       '0.0.0.0',
       '--web-port',
-      '8080',
+      '$port',
       '--verbose',
       '--wasm',
     ],
