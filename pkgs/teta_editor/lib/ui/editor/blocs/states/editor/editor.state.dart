@@ -5,29 +5,33 @@ part 'editor.state.freezed.dart';
 part 'editor.state.g.dart';
 
 @freezed
-class FlutterRunState with _$FlutterRunState {
-  const factory FlutterRunState.projectCreating({
+class ProjectContextState with _$ProjectContextState {
+  const factory ProjectContextState.projectCreating({
     @CommonEditorStateConverter() required CommonEditorState common,
   }) = _ProjectCreating;
-  const factory FlutterRunState.notStarted({
+  const factory ProjectContextState.notStarted({
     @CommonEditorStateConverter() required CommonEditorState common,
   }) = _NotStarted;
-  const factory FlutterRunState.starting({
+  const factory ProjectContextState.starting({
     @CommonEditorStateConverter() required CommonEditorState common,
   }) = _Starting;
-  const factory FlutterRunState.running({
+  const factory ProjectContextState.running({
     @CommonEditorStateConverter() required CommonEditorState common,
     required int localhostPort,
   }) = _Running;
-  const factory FlutterRunState.exceptionProjectNotCreated({
+  const factory ProjectContextState.exceptionProjectNotCreated({
     @CommonEditorStateConverter() required CommonEditorState common,
     required String errorMessage,
   }) = _ExceptionProjectNotCreated;
-  const factory FlutterRunState.exceptionProjectNotRunned({
+  const factory ProjectContextState.exceptionProjectNotRunned({
     @CommonEditorStateConverter() required CommonEditorState common,
     required String errorMessage,
   }) = _ExceptionProjectNotRunned;
+  // New state for when AI finishes writing files
+  const factory ProjectContextState.filesUpdated({
+    @CommonEditorStateConverter() required CommonEditorState common,
+  }) = _FilesUpdated;
 
-  factory FlutterRunState.fromJson(Map<String, dynamic> json) =>
-      _$FlutterRunStateFromJson(json);
+  factory ProjectContextState.fromJson(Map<String, dynamic> json) =>
+      _$ProjectContextStateFromJson(json);
 }

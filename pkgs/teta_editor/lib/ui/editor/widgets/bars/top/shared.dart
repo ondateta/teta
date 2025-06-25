@@ -18,14 +18,42 @@ class TopBarShared extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    // Access the ProjectContextCubit to get project details
+    // context.editor is the extension getter for ProjectContextCubit
+    final projectCubit = context.editor;
+    final currentProjectID = projectCubit.state.common.projectID;
+    final currentSdkType = projectCubit.state.common.sdkType.name;
+
     return <Widget>[
       Image.asset(
         'assets/logo.png',
         width: 40,
         height: 40,
-      ).centered().square(48).tooltip('Back to home').pointer().onTap(
-            () => context.go('/home'),
+      ).centered().square(48).tooltip('Back to projects').pointer().onTap(
+            () => context.go('/'), // Navigate to project selection screen
           ),
+      nil.color(theme.colorScheme.onSurface.withOpacity(0.2)).size(48, 1),
+      Padding( // Added padding for project info
+        padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              'Project: $currentProjectID',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurface.withOpacity(0.8),
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+            Text(
+              'SDK: $currentSdkType',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurface.withOpacity(0.8),
+              ),
+            ),
+          ],
+        ),
+      ),
       nil.color(theme.colorScheme.onSurface.withOpacity(0.2)).size(48, 1),
       IconButton(
         tooltip: 'Design',
