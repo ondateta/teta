@@ -1,12 +1,15 @@
 import 'package:editor/typedefs.dart';
 import 'package:editor/ui/ds/responsive_values.dart';
-import 'package:editor/ui/editor/blocs/editor.cubit.dart';
+// Updated import to the new cubit name/file
+import 'package:editor/ui/editor/blocs/project_context_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 extension UtilsContext on BuildContext {
-  FlutterRunCubit get editor => read<FlutterRunCubit>();
+  // Updated to use ProjectContextCubit
+  ProjectContextCubit get editor => read<ProjectContextCubit>();
   ID get projectID => editor.state.common.projectID;
+  // projectAppPath getter in CommonEditorState now returns the direct projectPath
   String get projectAppPath => editor.state.common.projectAppPath;
 
   bool isDarkMode() => Theme.of(this).brightness == Brightness.dark;

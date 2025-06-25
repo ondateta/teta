@@ -157,12 +157,89 @@ Future<Response> _dev(Request req) async {
           .map((e) => ChatCompletionUserMessage(
               content: ChatCompletionUserMessageContent.string(e)))
           .toList();
-  print('Sending request: $request');
-  final stream = _client.createChatCompletionStream(
-    request: CreateChatCompletionRequest(
-      model: ChatCompletionModel.modelId('o3-mini'),
-      messages: [
-        ChatCompletionMessage.system(content: '''
+
+  // Extract sdk_type, default to "flutter" if not provided for backward compatibility
+  final sdkType = json['sdk_type'] as String? ?? 'flutter';
+
+  print('Received /dev request for SDK type: $sdkType, User request: "$request"');
+
+  String systemPrompt;
+
+  if (sdkType == 'expo') {
+    systemPrompt = '''
+You are an Expo (React Native) developer copilot. Your task is to help build mobile applications using Expo and React Native with JavaScript or TypeScript, by providing only the necessary code updates. Do not include any comments, explanations, or additional text in your response. Only provide the code for the files that need to be updated or created. Use functional components with hooks.
+
+Use the following structure to specify files:
+
+To create or update a file (e.g., .js, .jsx, .ts, .tsx, package.json):
+@file /file/path.js
+[Code content]
+
+To delete a file:
+@file /file/path.js DELETE
+
+Ensure that all necessary imports are included. For styling, use StyleSheet.create.
+
+Example for a simple component:
+
+@file /components/MyButton.js
+import React from 'react';
+import { TouchableOpacity, Text, StyleSheet } from 'react-native';
+
+const MyButton = ({ title, onPress }) => (
+  <TouchableOpacity style={styles.button} onPress={onPress}>
+    <Text style={styles.text}>{title}</Text>
+  </TouchableOpacity>
+);
+
+const styles = StyleSheet.create({
+  button: {
+    backgroundColor: '#007AFF',
+    padding: 10,
+    borderRadius: 5,
+  },
+  text: {
+    color: 'white',
+    textAlign: 'center',
+  }
+});
+
+export default MyButton;
+
+@file /App.js
+import React from 'react';
+import { View, StyleSheet } from 'react-native';
+import MyButton from './components/MyButton';
+
+export default function App() {
+  return (
+    <View style={styles.container}>
+      <MyButton title="Press Me" onPress={() => alert('Button Pressed!')} />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  }
+});
+
+Current App code structure and content:
+$codeContent
+
+${errors.join('\n')}
+
+Instructions:
+Analyze the provided code and user request.
+Identify changes needed for an Expo (React Native) application.
+Provide only the updated or created JavaScript/TypeScript code for the specified files, without additional comments or phrases.
+Remember to include all necessary imports and use StyleSheet.create for styles.
+''';
+  } else { // Default to Flutter
+    systemPrompt = '''
 You are a Flutter developer copilot. Your task is to help build Flutter applications by providing only the necessary code updates. Do not include any comments, explanations, or additional text in your response. Only provide the code for the files that need to be updated or created.
 
 Use the following structure to specify files:
@@ -229,31 +306,39 @@ Instructions:
 Analyze the provided code.
 Identify changes needed.
 Provide only the updated or created code, without additional comments or phrases.
-'''),
+''';
+  }
+
+  print('Sending request to LLM with system prompt for $sdkType.');
+  final stream = _client.createChatCompletionStream(
+    request: CreateChatCompletionRequest(
+      model: ChatCompletionModel.modelId(Env.llmModel), // Use model from Env
+      messages: [
+        ChatCompletionMessage.system(content: systemPrompt),
         ...last5UserMessages,
         ChatCompletionUserMessage(
           content: ChatCompletionUserMessageContent.string(request),
         )
       ],
-      /*prediction: PredictionContent(
-        content: PredictionContentContent.text(codeContent),
-      ),*/
     ),
   );
 
   return Response.ok(
     stream.asyncMap(
       (event) {
-        print('${event.choices.first.delta.content}');
-        return event.choices.first.delta.content != null
-            ? utf8.encode(event.choices.first.delta.content!)
-            : utf8.encode('');
+        final content = event.choices.first.delta.content;
+        if (content != null) {
+          // print('LLM Delta: $content'); // Verbose logging for delta
+          return utf8.encode(content);
+        }
+        return utf8.encode('');
       },
     ),
-    context: {"shelf.io.buffer_output": false},
+    context: {"shelf.io.buffer_output": false}, // Ensure streaming
     headers: {
       'Cache-Control': 'no-store',
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json', // This should be 'text/event-stream' for SSE typically, but client handles JSON chunks
+      'X-Accel-Buffering': 'no', // Useful for Nginx reverse proxy
     },
   );
 }
